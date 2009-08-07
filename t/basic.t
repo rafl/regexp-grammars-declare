@@ -23,7 +23,7 @@ grammar LaTeX {
 
     sub foo { }
 
-    # why don't just backslashes work here?
+    # why don't only two backslashes work here?
     rule command {
         \\\  <name=literal>  <options>?  <args>?
     }
