@@ -9,38 +9,55 @@ grammar LaTeX {
         <file>
     }
 
+    sub foo { }
+
     rule file {
         <[element]>*
     }
+
+    sub foo { }
 
     rule element {
         <command> | <literal>
     }
 
+    sub foo { }
+
+    # why don't just backslashes work here?
     rule command {
-        \\ <name=literal>  <options>?  <args>?
+        \\\  <name=literal>  <options>?  <args>?
     }
+
+    sub foo { }
 
     rule options {
         \[  <[option]> ** (,)  \]
     }
 
+    sub foo { }
+
     rule args {
         \{  <[element]>*  \}
     }
 
+    sub foo { }
+
+    rule option {
+        [^][\$&%#_{}~^\s,]+
+    }
+
+    sub foo { }
+
     rule literal {
         [^][\$&%#_{}~^\s]+
     }
-}
 
-sub LaTeX () {}
+    sub foo { }
+}
 
 my $input = do { local $/; <DATA> };
 my $ast = $input ~~ LaTeX;
 ok($ast, 'matched');
-
-diag explain $ast;
 
 done_testing;
 

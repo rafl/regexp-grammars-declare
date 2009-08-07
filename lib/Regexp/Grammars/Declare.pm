@@ -3,8 +3,8 @@ package Regexp::Grammars::Declare;
 use Moose;
 use Devel::Declare ();
 use B::Hooks::EndOfScope;
-use Sub::Install 'install_sub';
 use Text::Balanced 'extract_bracketed';
+use Sub::Install 'install_sub', 'reinstall_sub';
 use aliased 'Regexp::Grammars::Declare::Grammar';
 use aliased 'Devel::Declare::Context::Simple', 'DDContext';
 use namespace::autoclean;
@@ -20,6 +20,8 @@ has class => (
     is       => 'ro',
     required => 1,
 );
+
+our %Grammar;
 
 sub _build_ctx {
     return DDContext->new;
@@ -130,20 +132,32 @@ sub parse_grammar {
     $self->skipspace;
 
     my $name = $self->strip_name;
-    confess 'anonymous grammars not supported yet'
-        if !defined $name || !length $name;
 
     $self->skipspace;
     $self->inject_if_block($self->scope_injector_call(';'), 'sub');
 
     $self->install_grammar_keywods;
 
+    install_sub({
+        code => sub { confess 'grammar not compiled yet' },
+        as   => $name,
+        into => $self->class,
+    }) if defined $name && length $name;
+
     $self->shadow(sub {
         my ($body) = @_;
-        local our @Rules = ();
+        local %Grammar;
         $body->();
         $self->uninstall_grammar_keywords;
-        warn 'building grammar';
+        my $grammar = Grammar->new(\%Grammar);
+
+        reinstall_sub({
+            code => sub { $grammar },
+            as   => $name,
+            into => $self->class,
+        }) if defined $name && length $name;
+
+        return $grammar;
     });
 }
 
@@ -160,19 +174,21 @@ sub parse_rule {
     $self->skipspace;
     my $block = $self->slurp_block;
     $block =~ s/'/\\'/g;
+    $block =~ s/^\n+//;
 
     my $linestr = $self->get_linestr;
     substr($linestr, $self->offset, 0) = qq[(sub { '$block' });];
-
-    # remove this, and the compiler will at least exit at some point, but
-    # obviously not do The Right Thing.
     $self->set_linestr($linestr);
 
     $self->shadow(sub {
-        use Data::Dump qw/pp/;
-        pp \@_;
-        return;
-            #push our @Rules, shift->();
+        my $val = shift->();
+        if ($name eq 'TOP') {
+            $Grammar{top} = $val;
+        }
+        else {
+            push @{ $Grammar{rules} }, [$name => $val];
+        }
+        return $val;
     });
 }
 
