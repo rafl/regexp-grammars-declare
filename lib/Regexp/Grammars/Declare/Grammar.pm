@@ -1,6 +1,7 @@
 package Regexp::Grammars::Declare::Grammar;
 
 use Moose;
+use MooseX::Types::Structured qw/Tuple/;
 use MooseX::Types::Moose qw/HashRef ArrayRef Str RegexpRef/;
 use namespace::clean -except => 'meta';
 
@@ -14,12 +15,12 @@ has top => (
 
 has rules => (
     is       => 'ro',
-    isa      => ArrayRef[ArrayRef[Str]],
+    isa      => ArrayRef[Tuple[Str, Str]],
 );
 
 has tokens => (
     is  => 'ro',
-    isa => ArrayRef[ArrayRef[Str]],
+    isa => ArrayRef[Tuple[Str, Str]],
 );
 
 has grammar => (
