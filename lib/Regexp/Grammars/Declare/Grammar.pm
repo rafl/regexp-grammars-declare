@@ -36,12 +36,12 @@ sub _build_grammar {
 
     my $grammar = $self->top . "\n\n";
 
-    for my $rule (@{ $self->rules }) {
+    for my $rule (@{ $self->rules || [] }) {
         $grammar .= qq[<rule: ${\$rule->[0]}>\n];
         $grammar .= qq[  ${\$rule->[1]}\n\n];
     }
 
-    for my $token (@{ $self->tokens }) {
+    for my $token (@{ $self->tokens || [] }) {
         $grammar .= qq[<token: ${\$token->[0]}>\n];
         $grammar .= qq[  ${\$token->[1]}\n\n];
     }
