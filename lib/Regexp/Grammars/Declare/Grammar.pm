@@ -15,7 +15,6 @@ has top => (
 has rules => (
     is       => 'ro',
     isa      => ArrayRef[ArrayRef[Str]],
-    required => 1,
 );
 
 has grammar => (
