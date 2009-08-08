@@ -39,9 +39,10 @@ grammar LaTeX {
     }
 }
 
-my $input = do { local $/; <DATA> };
+chomp(my $input = do { local $/; <DATA> });
 my $ast = $input ~~ LaTeX;
 ok($ast, 'matched');
+is($ast->{''}, $input, 'full input captured');
 
 done_testing;
 
