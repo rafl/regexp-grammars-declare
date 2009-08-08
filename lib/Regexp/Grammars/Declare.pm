@@ -107,12 +107,11 @@ sub slurp_block {
 
     my $remainder;
     while (!($remainder = $self->got_block($buf))) {
+        $self->skipspace;
+        $linestr = $self->get_linestr;
         $buf .= substr($linestr, $self->offset);
         substr($linestr, $self->offset) = '';
         $self->set_linestr($linestr);
-    } continue {
-        $self->skipspace;
-        $linestr = $self->get_linestr;
     }
 
     my $rest = substr($buf, length($buf) - $remainder);
