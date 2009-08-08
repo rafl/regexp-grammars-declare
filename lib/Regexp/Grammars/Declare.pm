@@ -160,14 +160,14 @@ sub parse_grammar {
     });
 }
 
-sub parse_rule {
-    my ($self) = @_;
+sub _parse_regexish {
+    my ($self, $type) = @_;
 
     $self->skip_declarator;
     $self->skipspace;
 
     my $name = $self->strip_name;
-    confess 'anonymous rules not allowed'
+    confess "anonymous ${type}s not allowed"
         if !defined $name || !length $name;
 
     $self->skipspace;
@@ -185,10 +185,20 @@ sub parse_rule {
             $Grammar{top} = $val;
         }
         else {
-            push @{ $Grammar{rules} }, [$name => $val];
+            push @{ $Grammar{qq{${type}s}} }, [$name => $val];
         }
         return $val;
     });
+}
+
+sub parse_rule {
+    my ($self) = @_;
+    $self->_parse_regexish('rule');
+}
+
+sub parse_token {
+    my ($self) = @_;
+    $self->_parse_regexish('token');
 }
 
 1;
