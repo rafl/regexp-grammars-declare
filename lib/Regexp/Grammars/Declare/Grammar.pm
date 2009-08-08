@@ -17,6 +17,11 @@ has rules => (
     isa      => ArrayRef[ArrayRef[Str]],
 );
 
+has tokens => (
+    is  => 'ro',
+    isa => ArrayRef[ArrayRef[Str]],
+);
+
 has grammar => (
     is      => 'ro',
     isa     => RegexpRef,
@@ -34,6 +39,11 @@ sub _build_grammar {
     for my $rule (@{ $self->rules }) {
         $grammar .= qq[<rule: ${\$rule->[0]}>\n];
         $grammar .= qq[  ${\$rule->[1]}\n\n];
+    }
+
+    for my $token (@{ $self->tokens }) {
+        $grammar .= qq[<token: ${\$token->[0]}>\n];
+        $grammar .= qq[  ${\$token->[1]}\n\n];
     }
 
     return qr{ $grammar }xms
